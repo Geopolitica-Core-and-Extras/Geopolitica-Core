@@ -206,6 +206,8 @@ MySQL storage is config-ready but not implemented, so SQLite is always used.
 
 Upkeep is. Not yet charged by a scheduled task.
 
+DISCLOSURE: THIS PROJECT, IN NO WAY, CLAIMS A PARNERSHIP OR AFFILIATION WITH MOJANG / MICROSOFT. WE IN NO WAY, ARE APPROVED OR REVIEWED BY MOJANG / MICROSOFT. 
+
 There is no localization system yet, even though there is a general one. language config key.
 
 API is planned to have info-grabbing features for comprehensive abilities. 
