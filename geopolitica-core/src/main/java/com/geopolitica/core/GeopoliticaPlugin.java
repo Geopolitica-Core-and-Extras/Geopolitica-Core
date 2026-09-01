@@ -10,6 +10,7 @@ import com.geopolitica.core.command.TownCommand;
 import com.geopolitica.core.command.TownTabCompleter;
 import com.geopolitica.core.config.ConfigManager;
 import com.geopolitica.core.economy.EconomyHook;
+import com.geopolitica.core.economy.UpkeepTask;
 import com.geopolitica.core.gui.GuiListener;
 import com.geopolitica.core.listener.ClaimProtectionListener;
 import com.geopolitica.core.listener.PlayerJoinListener;
@@ -18,11 +19,18 @@ import com.geopolitica.core.service.NationServiceImpl;
 import com.geopolitica.core.service.TownServiceImpl;
 import com.geopolitica.core.storage.DataStore;
 import com.geopolitica.core.storage.LoadResult;
+import com.geopolitica.core.storage.MySQLDataStore;
 import com.geopolitica.core.storage.SQLiteDataStore;
 import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
+
+import java.util.Locale;
 
 public class GeopoliticaPlugin extends JavaPlugin {
+
+    /** How often {@link UpkeepTask} runs, in ticks (20 ticks/sec * 60 * 60 * 24). */
+    private static final long UPKEEP_PERIOD_TICKS = 24L * 60 * 60 * 20;
 
     private ConfigManager configManager;
     private DataStore dataStore;
@@ -30,6 +38,7 @@ public class GeopoliticaPlugin extends JavaPlugin {
     private TownServiceImpl townService;
     private ClaimServiceImpl claimService;
     private NationServiceImpl nationService;
+    private BukkitTask upkeepTask;
 
     @Override
     public void onEnable() {
@@ -40,10 +49,14 @@ public class GeopoliticaPlugin extends JavaPlugin {
         boolean vaultFound = economyHook.setup();
         getLogger().info(vaultFound ? "Hooked into Vault for economy support." : "Vault not found; costs/upkeep/bank deposits are disabled.");
 
-        if (!configManager.getStorageType().equalsIgnoreCase("sqlite")) {
-            getLogger().warning("storage.type '" + configManager.getStorageType() + "' is not implemented yet; falling back to sqlite.");
-        }
-        dataStore = new SQLiteDataStore(this);
+        dataStore = switch (configManager.getStorageType().toLowerCase(Locale.ROOT)) {
+            case "mysql", "mariadb" -> new MySQLDataStore(this, configManager);
+            case "sqlite" -> new SQLiteDataStore(this);
+            default -> {
+                getLogger().warning("storage.type '" + configManager.getStorageType() + "' is not recognized; falling back to sqlite.");
+                yield new SQLiteDataStore(this);
+            }
+        };
 
         LoadResult loaded;
         try {
@@ -82,11 +95,17 @@ public class GeopoliticaPlugin extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new ClaimProtectionListener(claimService), this);
         getServer().getPluginManager().registerEvents(new PlayerJoinListener(townService), this);
 
+        UpkeepTask upkeep = new UpkeepTask(this, townService, claimService, configManager, economyHook);
+        upkeepTask = getServer().getScheduler().runTaskTimer(this, upkeep, UPKEEP_PERIOD_TICKS, UPKEEP_PERIOD_TICKS);
+
         getLogger().info("Geopolitica enabled.");
     }
 
     @Override
     public void onDisable() {
+        if (upkeepTask != null) {
+            upkeepTask.cancel();
+        }
         if (dataStore != null) {
             dataStore.close();
         }

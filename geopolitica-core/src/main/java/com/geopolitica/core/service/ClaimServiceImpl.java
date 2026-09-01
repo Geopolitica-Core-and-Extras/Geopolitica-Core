@@ -161,6 +161,12 @@ public class ClaimServiceImpl implements ClaimService {
         }
         Claim claim = claimOpt.get();
 
+        // The town's PvP toggle (/town pvp) is a master switch, on top of the
+        // per-trust-level permission matrix below - both have to allow it.
+        if (permission == ClaimPermission.PVP && !claim.getTown().isPvpEnabled()) {
+            return false;
+        }
+
         Resident resident = claim.getTown().getResidents().stream()
                 .filter(r -> r.getUniqueId().equals(player.getUniqueId()))
                 .findFirst()
@@ -182,6 +188,29 @@ public class ClaimServiceImpl implements ClaimService {
             claims.remove(new ChunkPos(claim.getWorldName(), claim.getChunkX(), claim.getChunkZ()));
         }
         town.getClaimImpls().clear();
+    }
+
+    /**
+     * Forcibly removes one claim with no refund, unlike {@link #unclaim}. Used by scheduled
+     * upkeep enforcement when a town can't pay and loses a chunk as a penalty.
+     *
+     * @return false if another plugin cancelled the {@link ClaimRemoveEvent}
+     */
+    public boolean forceUnclaim(Claim claimHandle) {
+        ClaimImpl claim = requireImpl(claimHandle);
+
+        ClaimRemoveEvent event = new ClaimRemoveEvent(claim);
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled()) {
+            return false;
+        }
+
+        TownImpl town = claim.getTownImpl();
+        ChunkPos pos = new ChunkPos(claim.getWorldName(), claim.getChunkX(), claim.getChunkZ());
+        town.removeClaim(claim);
+        claims.remove(pos);
+        persistAsync(() -> dataStore.deleteClaim(pos.world(), pos.x(), pos.z()));
+        return true;
     }
 
     private void applyDefaultPermissions(ClaimImpl claim) {

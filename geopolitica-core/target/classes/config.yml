@@ -3,8 +3,8 @@
 # economy features (costs, upkeep, bank accounts) are silently disabled.
 
 storage:
-  # Only 'sqlite' is implemented so far; 'mysql' is reserved for a future
-  # release (for shared storage across a multi-server network).
+  # 'sqlite' (single-server, no setup) or 'mysql'/'mariadb' (shared storage
+  # across a multi-server network) - see the mysql section below.
   type: sqlite
   mysql:
     host: localhost

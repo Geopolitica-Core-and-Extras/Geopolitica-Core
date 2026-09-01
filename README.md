@@ -40,7 +40,7 @@ Nation
 
 - You need to have Java 21 installed.
 
-- You need to have a Minecraft server that uses the Paper or Spigot plugin.
+- You need to have a Minecraft server that uses the Paper or Spigot plugin, version 1.21 or newer - including the 26.x line (Mojang's year-based renumbering of the same version line starting in 2026). One jar covers the whole range; there is no need for separate builds per Minecraft version.
 
 - You can also use the Vault plugin to add features to Geopolitica.
 
@@ -56,7 +56,13 @@ Nation
 
 ## Building
 
-You can build Geopolitica yourself using Java 21 and Maven .
+This is a multi-module Maven project: the root `pom.xml` builds `geopolitica-api` (the public API other plugins depend on) and `geopolitica-core` (the plugin itself). From the repository root:
+
+```
+mvn package
+```
+
+The plugin jar is produced at `geopolitica-core/target/Geopolitica-<version>.jar`. Requires Java 21 and Maven.
 
 ## Configuration
 
@@ -66,7 +72,7 @@ You can change the settings for Geopolitica in the configuration file.
 
 |---|---|---|
 
-| storage type | sqlite | The type of database used (MySQL to be added) |
+| storage type | sqlite | The type of database used (sqlite or mysql/mariadb) |
 
 Town min name length | 3 | The minimum length of a town's name.
 
@@ -202,13 +208,9 @@ StateSecedeEvent, TownStateChangeEvent.
 
 There are a few things that are not yet implemented:
 
-MySQL storage is config-ready but not implemented, so SQLite is always used.
-
-Upkeep is. Not yet charged by a scheduled task.
-
-DISCLOSURE: THIS PROJECT, IN NO WAY, CLAIMS A PARNERSHIP OR AFFILIATION WITH MOJANG / MICROSOFT. WE IN NO WAY, ARE APPROVED OR REVIEWED BY MOJANG / MICROSOFT. 
-
 There is no localization system yet, even though there is a general one. language config key.
 
 API is planned to have info-grabbing features for comprehensive abilities. 
+
+DISCLOSURE: THIS PROJECT, IN NO WAY, CLAIMS A PARNERSHIP OR AFFILIATION WITH MOJANG / MICROSOFT. WE IN NO WAY, ARE APPROVED OR REVIEWED BY MOJANG / MICROSOFT. 
 

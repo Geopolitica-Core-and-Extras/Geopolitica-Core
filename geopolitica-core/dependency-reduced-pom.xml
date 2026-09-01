@@ -3,7 +3,7 @@
   <parent>
     <artifactId>geopolitica-parent</artifactId>
     <groupId>com.geopolitica</groupId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>geopolitica-core</artifactId>
@@ -33,6 +33,10 @@
                 <relocation>
                   <pattern>com.zaxxer.hikari</pattern>
                   <shadedPattern>com.geopolitica.libs.hikari</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>com.mysql</pattern>
+                  <shadedPattern>com.geopolitica.libs.mysql</shadedPattern>
                 </relocation>
               </relocations>
               <filters>
