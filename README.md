@@ -26,7 +26,7 @@ Nation
 
 - Players can make their **towns** and claim land.
 
-- Players can. Leave **towns** and **nations**.
+- Players can leave **towns** and **nations**.
 
 - **Towns** and **nations** can have their banks and rules.
 
@@ -128,7 +128,7 @@ Any state member can use the following command:
 
 ### Admin Commands
 
-If you have the geopolitics. admin permission, you can use the following commands:
+If you have the Geopolitica admin permission, you can use the following commands:
 
 /gadmin reload. This command reloads the configuration outlined in Config.yml.
 
